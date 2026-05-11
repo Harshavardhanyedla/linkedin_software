@@ -8,7 +8,8 @@ import {
   CreditCard, 
   Settings, 
   LogOut,
-  ShieldAlert
+  ShieldAlert,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -19,8 +20,9 @@ import { useRouter } from 'next/navigation';
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Accounts', href: '/accounts', icon: Users },
-  { name: 'Upcoming Payments', href: '/payments', icon: CreditCard },
-  { name: 'Restrictions', href: '/restrictions', icon: ShieldAlert },
+  { name: 'History', href: '/history', icon: History },
+  { name: 'Payments', href: '/payments', icon: CreditCard },
+  { name: 'Shield', href: '/restrictions', icon: ShieldAlert },
   { name: 'Settings', href: '/settings', icon: Settings },
 ];
 

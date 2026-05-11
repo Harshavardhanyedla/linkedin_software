@@ -7,13 +7,15 @@ import {
   Users, 
   CreditCard, 
   Settings, 
-  ShieldAlert 
+  ShieldAlert,
+  History
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const navigation = [
   { name: 'Home', href: '/', icon: LayoutDashboard },
   { name: 'Accounts', href: '/accounts', icon: Users },
+  { name: 'History', href: '/history', icon: History },
   { name: 'Payments', href: '/payments', icon: CreditCard },
   { name: 'Shield', href: '/restrictions', icon: ShieldAlert },
   { name: 'Settings', href: '/settings', icon: Settings },
@@ -23,7 +25,7 @@ export function MobileNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t z-50 px-4 h-16 flex items-center justify-between pb-safe">
+    <nav className="lg:hidden fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t z-50 px-2 h-16 flex items-center justify-between pb-safe">
       {navigation.map((item) => {
         const Icon = item.icon;
         const isActive = pathname === item.href;
@@ -42,9 +44,9 @@ export function MobileNav() {
               "p-1 rounded-lg transition-colors",
               isActive ? "bg-primary/10" : "transparent"
             )}>
-              <Icon size={20} />
+              <Icon size={18} />
             </div>
-            <span className="text-[10px] font-medium">{item.name}</span>
+            <span className="text-[9px] font-medium">{item.name}</span>
           </Link>
         );
       })}
