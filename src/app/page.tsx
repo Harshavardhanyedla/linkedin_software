@@ -5,6 +5,7 @@ import { createClient } from '@/utils/supabase/client';
 import { StatsCards } from '@/components/dashboard/StatsCards';
 import { AccountsTable } from '@/components/accounts/AccountsTable';
 import { AddAccountModal } from '@/components/accounts/AddAccountModal';
+import { EditAccountModal } from '@/components/accounts/EditAccountModal';
 import { RestrictionModal } from '@/components/accounts/RestrictionModal';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +28,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [editModalAccount, setEditModalAccount] = useState<Account | null>(null);
   const [restrictionModalAccount, setRestrictionModalAccount] = useState<Account | null>(null);
   
   const supabase = createClient();
@@ -227,6 +229,7 @@ export default function DashboardPage() {
             <AccountsTable 
               accounts={filteredAccounts} 
               onMarkPaid={handleMarkPaid}
+              onEdit={(acc) => setEditModalAccount(acc)}
               onMarkRestricted={(acc) => setRestrictionModalAccount(acc)}
               onMarkActive={handleMarkActive}
               onDelete={handleDelete}
@@ -311,6 +314,15 @@ export default function DashboardPage() {
           isOpen={!!restrictionModalAccount}
           onClose={() => setRestrictionModalAccount(null)}
           account={restrictionModalAccount}
+          onSuccess={fetchDashboardData}
+        />
+      )}
+
+      {editModalAccount && (
+        <EditAccountModal
+          isOpen={!!editModalAccount}
+          onClose={() => setEditModalAccount(null)}
+          account={editModalAccount}
           onSuccess={fetchDashboardData}
         />
       )}

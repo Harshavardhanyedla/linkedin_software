@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, CreditCard, ShieldAlert, CheckCircle, Trash2, ExternalLink, Mail } from 'lucide-react';
+import { MoreHorizontal, CreditCard, ShieldAlert, CheckCircle, Trash2, ExternalLink, Mail, Edit2 } from 'lucide-react';
 import { Account } from '@/types';
 import { format, differenceInDays, parseISO } from 'date-fns';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -26,6 +26,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 interface AccountsTableProps {
   accounts: Account[];
   onMarkPaid: (id: string) => void;
+  onEdit: (account: Account) => void;
   onMarkRestricted: (account: Account) => void;
   onMarkActive: (id: string) => void;
   onDelete: (id: string) => void;
@@ -34,6 +35,7 @@ interface AccountsTableProps {
 export function AccountsTable({ 
   accounts, 
   onMarkPaid, 
+  onEdit,
   onMarkRestricted, 
   onMarkActive, 
   onDelete 
@@ -119,6 +121,10 @@ export function AccountsTable({
                         <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkPaid(account.id)}>
                           <CreditCard size={15} className="mr-3 text-emerald-500" />
                           <span className="font-medium">Mark as Paid</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onEdit(account)}>
+                          <Edit2 size={15} className="mr-3 text-blue-500" />
+                          <span className="font-medium">Edit Account</span>
                         </DropdownMenuItem>
                         <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkRestricted(account)}>
                           <ShieldAlert size={15} className="mr-3 text-amber-500" />
