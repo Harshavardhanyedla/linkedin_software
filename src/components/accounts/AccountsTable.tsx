@@ -108,13 +108,9 @@ export function AccountsTable({
                   <TableCell className="py-4">{getDaysRemaining(account.payment_date)}</TableCell>
                   <TableCell className="text-right py-4 pr-6">
                     <DropdownMenu>
-                      <DropdownMenuTrigger 
-                        render={
-                          <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/5">
-                            <MoreHorizontal size={18} />
-                          </Button>
-                        }
-                      />
+                      <DropdownMenuTrigger className="h-9 w-9 rounded-xl hover:bg-primary/10 flex items-center justify-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary">
+                        <MoreHorizontal size={18} />
+                      </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-56 glass border-border/20 p-1.5 shadow-2xl">
                         <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 px-2 py-1.5">Manage Account</DropdownMenuLabel>
                         <DropdownMenuSeparator className="bg-border/10" />
