@@ -8,19 +8,17 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { MoreHorizontal, CreditCard, ShieldAlert, CheckCircle, Trash2, Mail, Edit2 } from 'lucide-react';
+import { CreditCard, ShieldAlert, CheckCircle, Trash2, Mail, Edit2, MoreVertical } from 'lucide-react';
 import { Account } from '@/types';
 import { format, differenceInDays, parseISO } from 'date-fns';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 
 interface AccountsTableProps {
   accounts: Account[];
@@ -98,41 +96,54 @@ export function AccountsTable({
                 </TableCell>
                 <TableCell className="py-4">{getDaysRemaining(account.payment_date)}</TableCell>
                 <TableCell className="text-right py-4 pr-6">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger 
-                      className="h-9 w-9 rounded-xl hover:bg-primary/10 flex items-center justify-center transition-colors outline-none focus-visible:ring-2 focus-visible:ring-primary"
+                  <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button 
+                      variant="ghost" 
+                      size="icon-sm" 
+                      onClick={() => onMarkPaid(account.id)}
+                      className="text-emerald-500 hover:bg-emerald-500/10 rounded-lg h-8 w-8"
+                      title="Mark Paid"
                     >
-                      <MoreHorizontal size={18} />
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56 glass border-border/20 p-1.5 shadow-2xl">
-                      <DropdownMenuLabel className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground/70 px-2 py-1.5">Manage Account</DropdownMenuLabel>
-                      <DropdownMenuSeparator className="bg-border/10" />
-                      <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkPaid(account.id)}>
-                        <CreditCard size={15} className="mr-3 text-emerald-500" />
-                        <span className="font-medium">Mark as Paid</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onEdit(account)}>
-                        <Edit2 size={15} className="mr-3 text-blue-500" />
-                        <span className="font-medium">Edit Account</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkRestricted(account)}>
-                        <ShieldAlert size={15} className="mr-3 text-amber-500" />
-                        <span className="font-medium">Report Restriction</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkActive(account.id)}>
-                        <CheckCircle size={15} className="mr-3 text-blue-500" />
-                        <span className="font-medium">Set to Active</span>
-                      </DropdownMenuItem>
-                      <DropdownMenuSeparator className="bg-border/10" />
-                      <DropdownMenuItem 
-                        className="text-rose-500 focus:text-rose-500 focus:bg-rose-500/5 rounded-lg py-2" 
-                        onClick={() => onDelete(account.id)}
-                      >
-                        <Trash2 size={15} className="mr-3" />
-                        <span className="font-medium">Delete Account</span>
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                      <CreditCard size={14} />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon-sm" 
+                      onClick={() => onEdit(account)}
+                      className="text-blue-500 hover:bg-blue-500/10 rounded-lg h-8 w-8"
+                      title="Edit Account"
+                    >
+                      <Edit2 size={14} />
+                    </Button>
+                    
+                    <DropdownMenu>
+                      <DropdownMenuTrigger className="h-8 w-8 rounded-lg hover:bg-muted flex items-center justify-center outline-none">
+                        <MoreVertical size={14} className="text-muted-foreground" />
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-48 glass p-1 shadow-2xl">
+                        <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkRestricted(account)}>
+                          <ShieldAlert size={14} className="mr-3 text-amber-500" />
+                          <span className="font-medium text-xs">Report Restriction</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem className="rounded-lg py-2 focus:bg-primary/5" onClick={() => onMarkActive(account.id)}>
+                          <CheckCircle size={14} className="mr-3 text-emerald-500" />
+                          <span className="font-medium text-xs">Set to Active</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem 
+                          className="text-rose-500 focus:text-rose-500 focus:bg-rose-500/5 rounded-lg py-2" 
+                          onClick={() => onDelete(account.id)}
+                        >
+                          <Trash2 size={14} className="mr-3" />
+                          <span className="font-medium text-xs">Delete Account</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                  
+                  {/* Fallback for mobile or non-hover devices */}
+                  <div className="group-hover:hidden flex justify-end">
+                     <MoreVertical size={14} className="text-muted-foreground/30" />
+                  </div>
                 </TableCell>
               </TableRow>
           ))}
@@ -142,7 +153,7 @@ export function AccountsTable({
                 <div className="flex flex-col items-center justify-center gap-2 opacity-30">
                   <Mail size={48} className="mb-2" />
                   <p className="text-lg font-bold">No accounts found</p>
-                  <p className="text-sm max-w-xs mx-auto">Your account list is empty. Add your first LinkedIn account to start tracking.</p>
+                  <p className="text-sm max-w-xs mx-auto">Your account list is empty.</p>
                 </div>
               </TableCell>
             </TableRow>
