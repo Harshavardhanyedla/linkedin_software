@@ -66,7 +66,6 @@ export function Sidebar() {
                       ? "bg-secondary text-secondary-foreground font-medium" 
                       : "text-muted-foreground hover:bg-secondary/50 hover:text-foreground"
                   )}
-                  onClick={() => setIsOpen(false)}
                 >
                   <Icon size={20} />
                   {item.name}

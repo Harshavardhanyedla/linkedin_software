@@ -115,13 +115,18 @@
 
 @layer utilities {
   .glass {
-    @apply bg-background/60 backdrop-blur-md border border-border/50;
+    background: hsla(var(--background), 0.6);
+    backdrop-filter: blur(12px);
+    border: 1px solid hsla(var(--border), 0.5);
   }
   .glass-card {
-    @apply bg-card/40 backdrop-blur-sm border border-border/40 shadow-xl;
+    background: hsla(var(--card), 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid hsla(var(--border), 0.4);
+    box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
   .text-gradient {
-    @apply bg-clip-text text-transparent bg-linear-to-br from-foreground to-foreground/60;
+    @apply bg-clip-text text-transparent bg-gradient-to-br from-foreground to-foreground/60;
   }
 }
 
