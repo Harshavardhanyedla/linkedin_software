@@ -4,9 +4,10 @@ import { useEffect, useState, useCallback } from 'react';
 import { createClient } from '@/utils/supabase/client';
 import { AccountsTable } from '@/components/accounts/AccountsTable';
 import { AddAccountModal } from '@/components/accounts/AddAccountModal';
+import { EditAccountModal } from '@/components/accounts/EditAccountModal';
 import { RestrictionModal } from '@/components/accounts/RestrictionModal';
 import { Button } from '@/components/ui/button';
-import { Plus, Search, Filter, RefreshCcw, Loader2 } from 'lucide-react';
+import { Plus, Search, RefreshCcw, Loader2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Account } from '@/types';
 import { toast } from 'sonner';
@@ -17,8 +18,8 @@ export default function AccountsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isRestrictModalOpen, setIsRestrictModalOpen] = useState(false);
-  const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
+  const [editModalAccount, setEditModalAccount] = useState<Account | null>(null);
+  const [restrictionModalAccount, setRestrictionModalAccount] = useState<Account | null>(null);
   
   const supabase = createClient();
 
@@ -59,8 +60,9 @@ export default function AccountsPage() {
 
       await supabase.from('payment_history').insert({
         account_id: id,
-        old_payment_date: oldDate,
-        new_payment_date: newDate,
+        amount: 0,
+        payment_date: new Date().toISOString(),
+        notes: `Auto-advanced from ${oldDate}`
       });
 
       toast.success('Payment recorded');
@@ -68,11 +70,6 @@ export default function AccountsPage() {
     } catch (error) {
       toast.error('Failed to update');
     }
-  };
-
-  const handleMarkRestricted = (account: Account) => {
-    setSelectedAccount(account);
-    setIsRestrictModalOpen(true);
   };
 
   const handleMarkActive = async (id: string) => {
@@ -104,45 +101,52 @@ export default function AccountsPage() {
   );
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto">
+    <div className="space-y-8 max-w-7xl mx-auto pb-20">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Accounts</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage all your LinkedIn accounts in one place.
+          <h1 className="text-4xl font-bold tracking-tight text-gradient">Accounts</h1>
+          <p className="text-muted-foreground mt-1 text-lg">
+            Manage all your LinkedIn accounts and payment schedules.
           </p>
         </div>
-        <Button onClick={() => setIsAddModalOpen(true)} className="shadow-lg shadow-primary/20">
-          <Plus className="mr-2 h-4 w-4" />
+        <Button 
+          size="lg"
+          onClick={() => setIsAddModalOpen(true)} 
+          className="shadow-lg shadow-primary/20 font-semibold px-8"
+        >
+          <Plus className="mr-2 h-5 w-5" />
           Add Account
         </Button>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between gap-4">
-          <div className="relative w-full max-w-sm">
+          <div className="relative w-full max-w-md">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input 
               placeholder="Search by email..." 
-              className="pl-9 bg-background/50 border-none shadow-inner"
+              className="pl-10 bg-background/50 border-none shadow-sm focus-visible:ring-1"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
-          <Button variant="ghost" size="icon" onClick={fetchAccounts}>
+          <Button variant="ghost" size="icon" onClick={fetchAccounts} className="rounded-full">
             <RefreshCcw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
           </Button>
         </div>
 
         {isLoading ? (
-          <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <div className="grid gap-4">
+            {[1, 2, 3, 4].map(i => (
+              <div key={i} className="h-20 w-full bg-muted/30 animate-pulse rounded-2xl" />
+            ))}
           </div>
         ) : (
           <AccountsTable 
             accounts={filteredAccounts}
             onMarkPaid={handleMarkPaid}
-            onMarkRestricted={handleMarkRestricted}
+            onEdit={(acc) => setEditModalAccount(acc)}
+            onMarkRestricted={(acc) => setRestrictionModalAccount(acc)}
             onMarkActive={handleMarkActive}
             onDelete={handleDelete}
           />
@@ -155,12 +159,23 @@ export default function AccountsPage() {
         onSuccess={fetchAccounts}
       />
 
-      <RestrictionModal 
-        account={selectedAccount}
-        isOpen={isRestrictModalOpen}
-        onClose={() => setIsRestrictModalOpen(false)}
-        onSuccess={fetchAccounts}
-      />
+      {restrictionModalAccount && (
+        <RestrictionModal 
+          account={restrictionModalAccount}
+          isOpen={!!restrictionModalAccount}
+          onClose={() => setRestrictionModalAccount(null)}
+          onSuccess={fetchAccounts}
+        />
+      )}
+
+      {editModalAccount && (
+        <EditAccountModal
+          isOpen={!!editModalAccount}
+          onClose={() => setEditModalAccount(null)}
+          account={editModalAccount}
+          onSuccess={fetchAccounts}
+        />
+      )}
     </div>
   );
 }
