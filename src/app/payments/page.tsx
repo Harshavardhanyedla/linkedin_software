@@ -7,7 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Account } from '@/types';
 import { format, isBefore, isAfter, parseISO, startOfDay, addDays } from 'date-fns';
-import { CreditCard, Calendar, Clock, AlertCircle, Loader2, ChevronRight } from 'lucide-react';
+import { CreditCard, Calendar, Clock, AlertCircle, Loader2, ChevronRight, Check } from 'lucide-react';
+import { addMonths } from 'date-fns';
+import { toast } from 'sonner';
 import { motion } from 'framer-motion';
 
 export default function PaymentsPage() {
@@ -35,6 +37,36 @@ export default function PaymentsPage() {
   useEffect(() => {
     fetchAccounts();
   }, [fetchAccounts]);
+  
+  const handleMarkPaid = async (account: Account) => {
+    try {
+      const nextDate = format(addMonths(parseISO(account.payment_date), 1), 'yyyy-MM-dd');
+      
+      const { error: updateError } = await supabase
+        .from('accounts')
+        .update({ 
+          payment_date: nextDate,
+          status: 'Active' // Reset status if it was overdue
+        })
+        .eq('id', account.id);
+
+      if (updateError) throw updateError;
+
+      // Log to payment history
+      await supabase.from('payment_history').insert({
+        account_id: account.id,
+        amount: 0, // Optional: could add an amount field if needed
+        payment_date: new Date().toISOString(),
+        notes: 'Monthly payment completed'
+      });
+
+      toast.success(`Payment confirmed for ${account.email}`);
+      fetchAccounts();
+    } catch (error) {
+      console.error(error);
+      toast.error('Failed to process payment');
+    }
+  };
 
   const today = startOfDay(new Date());
   const tomorrow = addDays(today, 1);
@@ -75,8 +107,14 @@ export default function PaymentsPage() {
         {status === 'overdue' && <Badge variant="destructive" className="animate-pulse">Overdue</Badge>}
         {status === 'today' && <Badge className="bg-amber-500 border-none text-white">Due Today</Badge>}
         {status === 'tomorrow' && <Badge className="bg-blue-500 border-none text-white">Due Tomorrow</Badge>}
-        <Button size="icon" variant="ghost" className="rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-          <ChevronRight size={18} />
+        
+        <Button 
+          size="sm" 
+          onClick={() => handleMarkPaid(account)}
+          className="bg-emerald-500 hover:bg-emerald-600 text-white border-none h-8 px-3 text-xs font-semibold"
+        >
+          <Check size={14} className="mr-1.5" />
+          Mark Paid
         </Button>
       </div>
     </motion.div>
