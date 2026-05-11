@@ -15,6 +15,7 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
+import { addMonths, format, parseISO } from 'date-fns';
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -24,7 +25,7 @@ interface AddAccountModalProps {
 
 export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalProps) {
   const [email, setEmail] = useState('');
-  const [paymentDate, setPaymentDate] = useState('');
+  const [startDate, setStartDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
 
@@ -36,9 +37,11 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
+      const nextPaymentDate = format(addMonths(parseISO(startDate), 1), 'yyyy-MM-dd');
+
       const { error } = await supabase.from('accounts').insert({
         email,
-        payment_date: paymentDate,
+        payment_date: nextPaymentDate,
         user_id: user.id,
         status: 'Active'
       });
@@ -47,7 +50,7 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
 
       toast.success('Account added successfully');
       setEmail('');
-      setPaymentDate('');
+      setStartDate('');
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -81,15 +84,18 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="payment-date">Next Payment Date</Label>
+              <Label htmlFor="start-date">Date of Addition (Start Date)</Label>
               <Input
-                id="payment-date"
+                id="start-date"
                 type="date"
-                value={paymentDate}
-                onChange={(e) => setPaymentDate(e.target.value)}
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
                 required
                 className="bg-muted/50 border-none"
               />
+              <p className="text-[10px] text-muted-foreground">
+                The first reminder will be set for the same date next month.
+              </p>
             </div>
           </div>
           <DialogFooter>
