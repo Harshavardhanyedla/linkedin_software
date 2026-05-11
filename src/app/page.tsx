@@ -67,72 +67,48 @@ export default function DashboardPage() {
     }
   }, [supabase]);
 
-  const calculateStats = (data: Account[]) => {
-    const today = startOfDay(new Date());
-    const nextWeek = addDays(today, 7);
-
-    setStats({
-      totalAccounts: data.length,
-      upcomingPayments: data.filter(acc => {
-        const date = parseISO(acc.payment_date);
-        return (isAfter(date, today) || date.getTime() === today.getTime()) && isBefore(date, nextWeek);
-      }).length,
-      overdueAccounts: data.filter(acc => acc.status === 'Overdue').length,
-      restrictedAccounts: data.filter(acc => acc.status === 'Restricted').length,
-    });
-  };
-
   useEffect(() => {
-    fetchAccounts();
-  }, [fetchAccounts]);
+    fetchDashboardData();
+  }, [fetchDashboardData]);
 
   const handleMarkPaid = async (id: string) => {
-    const account = accounts.find(a => a.id === id);
-    if (!account) return;
-
     try {
-      const oldDate = account.payment_date;
-      const newDate = format(addMonths(parseISO(oldDate), 1), 'yyyy-MM-dd');
+      const account = accounts.find(a => a.id === id);
+      if (!account) return;
 
-      const { error: accError } = await supabase
+      const nextDate = format(addMonths(parseISO(account.payment_date), 1), 'yyyy-MM-dd');
+      
+      const { error } = await supabase
         .from('accounts')
-        .update({
-          payment_date: newDate,
-          status: 'Active',
-          updated_at: new Date().toISOString(),
-        })
+        .update({ payment_date: nextDate, status: 'Active' })
         .eq('id', id);
 
-      if (accError) throw accError;
-
+      if (error) throw error;
+      
       await supabase.from('payment_history').insert({
         account_id: id,
-        old_payment_date: oldDate,
-        new_payment_date: newDate,
+        amount: 0,
+        payment_date: new Date().toISOString(),
+        notes: 'Payment marked as paid'
       });
 
-      toast.success('Payment recorded successfully');
-      fetchAccounts();
-    } catch (error: any) {
-      toast.error('Failed to mark as paid');
+      toast.success('Payment updated successfully');
+      fetchDashboardData();
+    } catch (error) {
+      toast.error('Failed to update payment');
     }
-  };
-
-  const handleMarkRestricted = (account: Account) => {
-    setSelectedAccount(account);
-    setIsRestrictModalOpen(true);
   };
 
   const handleMarkActive = async (id: string) => {
     try {
       const { error } = await supabase
         .from('accounts')
-        .update({ status: 'Active', updated_at: new Date().toISOString() })
+        .update({ status: 'Active' })
         .eq('id', id);
 
       if (error) throw error;
-      toast.success('Account marked as Active');
-      fetchAccounts();
+      toast.success('Account status updated to Active');
+      fetchDashboardData();
     } catch (error) {
       toast.error('Failed to update status');
     }
@@ -140,12 +116,15 @@ export default function DashboardPage() {
 
   const handleDelete = async (id: string) => {
     if (!confirm('Are you sure you want to delete this account?')) return;
-
     try {
-      const { error } = await supabase.from('accounts').delete().eq('id', id);
+      const { error } = await supabase
+        .from('accounts')
+        .delete()
+        .eq('id', id);
+
       if (error) throw error;
       toast.success('Account deleted');
-      fetchAccounts();
+      fetchDashboardData();
     } catch (error) {
       toast.error('Failed to delete account');
     }
