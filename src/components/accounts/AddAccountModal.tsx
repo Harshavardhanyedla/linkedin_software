@@ -15,7 +15,6 @@ import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
 import { Loader2, Plus } from 'lucide-react';
 import { createClient } from '@/utils/supabase/client';
-import { addMonths, format } from 'date-fns';
 
 interface AddAccountModalProps {
   isOpen: boolean;
@@ -25,6 +24,7 @@ interface AddAccountModalProps {
 
 export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalProps) {
   const [email, setEmail] = useState('');
+  const [paymentDate, setPaymentDate] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const supabase = createClient();
 
@@ -36,11 +36,9 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not authenticated');
 
-      const nextPaymentDate = format(addMonths(new Date(), 1), 'yyyy-MM-dd');
-
       const { error } = await supabase.from('accounts').insert({
         email,
-        payment_date: nextPaymentDate,
+        payment_date: paymentDate,
         user_id: user.id,
         status: 'Active'
       });
@@ -49,6 +47,7 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
 
       toast.success('Account added successfully');
       setEmail('');
+      setPaymentDate('');
       onSuccess();
       onClose();
     } catch (error: any) {
@@ -70,19 +69,27 @@ export function AddAccountModal({ isOpen, onClose, onSuccess }: AddAccountModalP
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="email" className="text-sm font-medium">Account Email</Label>
+              <Label htmlFor="email">Email address</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="Enter LinkedIn email address"
+                placeholder="account@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="bg-muted/50 border-none h-11"
+                className="bg-muted/50 border-none"
               />
-              <p className="text-[10px] text-muted-foreground mt-1 px-1">
-                The next payment date will be automatically set to one month from today.
-              </p>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="payment-date">Next Payment Date</Label>
+              <Input
+                id="payment-date"
+                type="date"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+                required
+                className="bg-muted/50 border-none"
+              />
             </div>
           </div>
           <DialogFooter>
