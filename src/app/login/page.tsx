@@ -23,6 +23,12 @@ export default function LoginPage() {
     e.preventDefault();
     setIsLoading(true);
 
+    if (email !== 'harshavardhanyedla123@gmail.com') {
+      toast.error('Access Denied: Only the admin can log in.');
+      setIsLoading(false);
+      return;
+    }
+
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -98,12 +104,6 @@ export default function LoginPage() {
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Sign In
               </Button>
-              <p className="text-sm text-center text-muted-foreground">
-                Don&apos;t have an account?{' '}
-                <Link href="/signup" className="text-primary hover:underline font-medium">
-                  Create one
-                </Link>
-              </p>
             </CardFooter>
           </form>
         </Card>

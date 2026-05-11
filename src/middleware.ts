@@ -57,6 +57,15 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url)
   }
 
+  // Enforce single admin email
+  if (user && user.email !== 'harshavardhanyedla123@gmail.com') {
+    await supabase.auth.signOut()
+    const url = request.nextUrl.clone()
+    url.pathname = '/login'
+    url.searchParams.set('error', 'unauthorized')
+    return NextResponse.redirect(url)
+  }
+
   return supabaseResponse
 }
 
